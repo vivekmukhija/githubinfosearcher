@@ -10,6 +10,7 @@ const App = () => {
   const [searched, setSearched] = useState(false)
   const [loading, setloading] = useState(false);
 
+
   function submit(e) {
     e.preventDefault()
     if (inputVal === "") { alert("please Enter Username") }
@@ -24,14 +25,22 @@ const App = () => {
 
     setloading(true)
 
-    console.log("submit")
-    const response = await axios.get(`https://api.github.com/users/${username}`)
-    console.log(response.data);
+    try {
+      const response = await axios.get(`https://api.github.com/users/${username}`)
+      setallData(prevUsers => [...prevUsers, response.data]);
+    } catch (error) {
+      alert("User not found");
+      setallData(null);
+    } finally {
+      setloading(false)
+      setinputVal('')
+    }
 
-    setallData(response.data)
-    setloading(false)
-    setinputVal('')
+
+
+
   }
+
   useEffect(function () {
     if (!username) return
     getData()
@@ -51,10 +60,17 @@ const App = () => {
         <button>Get Information</button>
       </form>
 
-      <Cards allData={allData} searched={searched} loading={loading} />
+      <div className='accounts'>
+        {searched && loading && <p>Loading...</p>}
+        {searched && !loading && allData && (
+          allData.map((elem,idx) => {
+            return <Cards key={idx} elem={elem}/>
+          })
+        )}
+      </div>
     </div>
   )
 }
-
+//  searched={searched} loading={loading} 
 export default App
 
